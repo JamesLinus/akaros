@@ -234,8 +234,14 @@ void __attribute__((constructor)) uthread_lib_init(void)
 	                                   unsigned int ev_type, void *data);
 	int ret;
 
-	/* Only run once, but make sure that vcore_lib_init() has run already. */
+	/* Only run once, but make sure that vcore_lib_init() has run already.
+	 * Additionally, we need to check and see if another version of
+	 * uthread_lib_init() has already run.  That could be a ctor in another
+	 * shared object (e.g. libelf.so).  We can't rely on the init_once_racy()
+	 * either, since the library would have its own copy of the static bool. */
 	init_once_racy(return);
+	if (is_scp_vcctx_ready())
+		return;
 	vcore_lib_init();
 
 	ret = posix_memalign((void**)&thread0_uth, __alignof__(struct uthread),

@@ -173,6 +173,10 @@ void __attribute__((constructor)) vcore_lib_init(void)
 	 * to call any other init functions after our run_once() call. This may
 	 * change in the future. */
 	init_once_racy(return);
+	/* See uthread_lib_init().  Parlib ctors might have been called already from
+	 * a shared library. */
+	if (is_scp_vcctx_ready())
+		return;
 	/* Need to alloc vcore0's transition stuff here (technically, just the TLS)
 	 * so that schedulers can use vcore0's transition TLS before it comes up in
 	 * vcore_entry() */

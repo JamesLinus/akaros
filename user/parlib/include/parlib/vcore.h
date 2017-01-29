@@ -203,6 +203,12 @@ static inline uint64_t vcore_account_uptime_nsec(uint32_t vcoreid)
 	return tsc2nsec(vcore_account_uptime_ticks(vcoreid));
 }
 
+static inline bool is_scp_vcctx_ready(void)
+{
+	return !(atomic_read(&__procdata.vcore_preempt_data[0].flags)
+	         & VC_SCP_NOVCCTX);
+}
+
 #ifndef __PIC__
 
 #define begin_safe_access_tls_vars()
