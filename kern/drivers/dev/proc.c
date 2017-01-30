@@ -89,11 +89,13 @@ enum {
 	CMwaitstop,
 	CMwired,
 	CMcore,
-	CMvminit,
-	CMvmstart,
-	CMvmkill,
+	CMvminit, // XXX remove these
+	CMvmstart, // XXX remove these
+	CMvmkill, // XXX remove these
 	CMstraceme,
 	CMstraceall,
+
+	// XXX add a userspace interface.  maybe CMstracedrop and CMstracenodrop
 };
 
 enum {
@@ -1359,6 +1361,12 @@ static void strace_release(struct kref *a)
 	kfree(strace);
 }
 
+struct queue *q;
+void foo()
+{
+	printk("q %p, len %d\n", q, qlen(q));
+}
+
 static void procctlreq(struct proc *p, char *va, int n)
 {
 	ERRSTACK(1);
@@ -1386,10 +1394,14 @@ static void procctlreq(struct proc *p, char *va, int n)
 			strace = kzmalloc(sizeof(*p->strace), MEM_WAIT);
 			spinlock_init(&strace->lock);
 			bitmap_set(strace->trace_set, 0, MAX_SYSCALL_NR);
-			strace->q = qopen(65536, 0, NULL, NULL);
+			strace->q = qopen(124, 0, NULL, NULL);
 			/* The queue is reopened and hungup whenever we open the Qstrace
 			 * file.  This hangup might not be necessary, but is safer. */
 			qhangup(strace->q, NULL);
+
+// XXX 
+q = strace->q;
+
 			/* both of these refs are put when the proc is freed.  procs is for
 			 * every process that has this p->strace.  users is procs + every
 			 * user (e.g. from open()).

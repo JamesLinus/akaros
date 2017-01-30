@@ -302,6 +302,7 @@ static void systrace_finish_trace(struct kthread *kthread, long retval)
 
 static void alloc_sysc_str(struct kthread *kth)
 {
+	// XXX can't wait!
 	kth->name = kmalloc(SYSCALL_STRLEN, MEM_WAIT);
 	kth->name[0] = 0;
 }
@@ -740,6 +741,20 @@ static error_t sys_proc_destroy(struct proc *p, pid_t pid, int exitcode)
 	proc_destroy(p_to_die);
 	proc_decref(p_to_die);
 	return 0;
+}
+
+void xme()
+{
+	struct per_cpu_info *pcpui = &per_cpu_info[core_id()];
+	struct kthread *kth_i = pcpui->cur_kthread;
+
+	printk("CORE %d, cur_proc %d\n", core_id(),
+	       pcpui->cur_proc ? pcpui->cur_proc->pid : 0);
+	if (kth_i)
+		printk("\tKthread %p (%s), proc %d, sysc %p, pc/frame %p %p\n",
+		       kth_i, kth_i->name, kth_i->proc ? kth_i->proc->pid : 0,
+		       kth_i->sysc, jmpbuf_get_pc(&kth_i->context),
+		       jmpbuf_get_fp(&kth_i->context));
 }
 
 static int sys_proc_yield(struct proc *p, bool being_nice)

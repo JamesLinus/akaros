@@ -399,6 +399,8 @@ static void parse_traces(FILE *fp)
 	ssize_t read;
 	char *_line;
 
+	// XXX this is nice for us, since it gives us records on line boundaries,
+	// but it sucks due to byte-at-a-time reads
 	while ((read = getline(&line, &len, fp)) != -1) {
 		_line = line;
 		if (opts.raw_output) {
